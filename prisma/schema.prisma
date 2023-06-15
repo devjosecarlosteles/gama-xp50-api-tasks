@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Sprints {
+  id        String   @id @default(uuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+
+  status StatusSprintEnum
+
+  isDeleted Boolean @default(false)
+
+  tasks Tasks[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("sprints")
+}
+
+model Tasks {
+  id String @id @default(uuid())
+
+  title       String
+  endDate     DateTime?
+  status      StatusTaskEnum @default(PENDING)
+  priority    PriorityEnum   @default(LOW)
+  sprintPoint Int?
+
+  users   Users?  @relation(fields: [usersId], references: [id])
+  usersId String?
+
+  sprints   Sprints? @relation(fields: [sprintsId], references: [id])
+  sprintsId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("task")
+}
+
+model Users {
+  id String @id @default(uuid())
+
+  name  String
+  email String?
+
+  tasks Tasks[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+enum StatusSprintEnum {
+  ACTIVE
+  INACTIVE
+  CONCLUDED
+
+  @@map("status_sprint_enum")
+}
+
+enum StatusTaskEnum {
+  DOING
+  STOPED
+  CONCLUDED
+  PENDING
+
+  @@map("status_task_enum")
+}
+
+enum PriorityEnum {
+  HIGH
+  LOW
+  AVERAGE
+
+  @@map("priority_enum")
+}
